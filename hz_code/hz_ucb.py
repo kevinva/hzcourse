@@ -22,9 +22,8 @@ class UpperConfidenceBounds:
         max_actions = []
         max_value = float("-inf")
         for action in actions:
-            value = qfunction.get_q_value(state, action) + C_PUTS * math.sqrt(
-                math.log(self.total) / self.times_selected[action]
-            )
+            value = qfunction.get_q_value(state, action) 
+            + C_PUTS * math.sqrt(math.log(self.total) / self.times_selected[action])
             if value > max_value:
                 max_actions = [action]
                 max_value = value
