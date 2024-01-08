@@ -4,6 +4,7 @@ import random
 from collections import defaultdict
 
 from hz_utils import LOGGER
+from hz_mdp import *
 
 
 class Node:
@@ -14,30 +15,34 @@ class Node:
     # Records the number of times states have been visited
     visits = defaultdict(lambda: 0)
 
-    def __init__(self, mdp, parent, state, qfunction, q_algorithm, reward=0.0, action=None):
+    def __init__(self, mdp, parent, person_state, qfunction, q_algorithm, reward = 0.0, action = None):
         self.mdp = mdp
         self.parent = parent
-        self.state = state
-        self.nid = Node.next_node_id
-        Node.next_node_id += 1
 
-        # The Q function used to store state-action values
+        # 个人状态：标签、各维度能力分数
+        self.person_state = person_state 
+
+        # 状态-动作价值函数
         self.qfunction = qfunction
 
-        # 状态评估算法，如UCB
+        # 状态-动作评估算法，如UCB
         self.q_algorithm = q_algorithm
 
         # The immediate reward received for reaching this state, used for backpropagation
         self.reward = reward
 
-        # The action that generated this node
+        # 导出该节点的动作，即对应课程名称
         self.action = action
 
+        # 子节点
         self.children = {}
+
+        self.nid = Node.next_node_id
+        Node.next_node_id += 1
 
 
     def is_fully_expanded(self):
-        valid_actions = self.mdp.get_actions(self.state)
+        valid_actions = self.mdp.get_actions(self.person_state)
         if len(valid_actions) == len(self.children):
             return True
         else:
@@ -46,25 +51,26 @@ class Node:
 
     def select(self):
         # 该节点要完全展开完，才会选其子节点
-        if not self.is_fully_expanded() or self.mdp.is_terminal(self.state):
+        if not self.is_fully_expanded() or self.mdp.is_terminal(self.person_state):
             return self
         else:
             actions = list(self.children.keys())
-            action = self.q_algorithm.select(self.state, actions, self.qfunction)
+            action = self.q_algorithm.select(self.person_state, actions, self.qfunction)
             
-            LOGGER.info(f"select child: action = {action}， from state = {self.state}")
+            LOGGER.info(f"select child: action = {action}， from state = {str(self.person_state)}")
             return self.get_outcome_child(action).select()
 
 
     def expand(self):
-        if not self.mdp.is_terminal(self.state):
+        if not self.mdp.is_terminal(self.person_state):
             # Randomly select an unexpanded action to expand
             # 其实就是选一个从来没执行过的动作来expand，即每次只展开一个子节点
-            actions = self.mdp.get_actions(self.state) - self.children.keys()
+            actions = self.mdp.get_actions(self.person_state) - self.children.keys()
             action = random.choice(list(actions))
 
             self.children[action] = []
             return self.get_outcome_child(action)
+        
         return self
 
 
@@ -138,7 +144,7 @@ class MCTS:
         current_time = time.time()
         while current_time < start_time + timeout:
             selected_node = root_node.select()
-            if not self.mdp.is_terminal(selected_node.state):
+            if not self.mdp.is_terminal(selected_node.person_state):
                 child = selected_node.expand()
                 reward = self.simulate(child)
                 selected_node.back_propagate(reward, child)
@@ -190,3 +196,14 @@ class MCTS:
         print("===========================================\n\n")
 
         return cumulative_reward
+
+if __name__ == "__main__":
+    state1 = PersonState()
+    state2 = PersonState()
+
+    my_dict = {}
+    my_dict[state1] = 1
+    my_dict[state2] = 2
+    print(my_dict[state1])
+    my_dict[state1] = my_dict[state1] + 2
+    print(my_dict[state1])
