@@ -1,4 +1,5 @@
 import logging
+import time
 
 def config_logger():
     logger = logging.getLogger('hoho_logger')
@@ -27,3 +28,12 @@ def config_logger():
 
 
 LOGGER = config_logger()
+
+
+
+def suffix_time():
+    current_time = time.time()
+    local_time = time.localtime(current_time)
+    time_str = time.strftime('%Y%m%d%H%M%S', local_time)
+    return time_str
+

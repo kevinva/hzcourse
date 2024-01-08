@@ -12,10 +12,6 @@ class QTable():
         return self.qtable[(state, action)]
 
 
-    """ Return a pair containing the action and Q-value, where the
-        action has the maximum Q-value in state
-    """
-
     def get_max_q(self, state, actions):
         arg_max_q = None
         max_q = float("-inf")

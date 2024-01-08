@@ -4,6 +4,7 @@ from hz_constants import *
 
 
 class UpperConfidenceBounds:
+    
     def __init__(self):
         self.total = 0
 
