@@ -207,13 +207,15 @@ class HZCourseWorld:
             check_tags_count = len(self.course_info["习惯"].keys())
             next_state.habit_score = (check_tags_count - len(next_state.habit_tags)) * 100.0 / check_tags_count
             return next_state, reward
+        
+        return next_state, 0
 
 
     def get_discount_factor(self):
         return DISCOUNT_FACTOR
 
     def get_transitions(self, state, action):
-        pass
+        return 1.0 # hoho_todo
 
     def get_initial_state(self):
         return self.init_person_state

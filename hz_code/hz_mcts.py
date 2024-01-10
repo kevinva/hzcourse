@@ -5,14 +5,15 @@ from collections import defaultdict
 
 from hz_utils import LOGGER
 from hz_mdp import *
-
+from hz_ucb import *
+from hz_qtable import *
 
 class Node:
 
-    # Record a unique node id to distinguish duplicated states
+    # 记录节点唯一id，以区分节点对应状态
     next_node_id = 0
 
-    # Records the number of times states have been visited
+    # 记录节点对应状态被访问次数
     visits = defaultdict(lambda: 0)
 
     def __init__(self, mdp, parent, person_state, qfunction, q_algorithm, reward = 0.0, action = None):
@@ -28,7 +29,7 @@ class Node:
         # 状态-动作评估算法，如UCB
         self.q_algorithm = q_algorithm
 
-        # The immediate reward received for reaching this state, used for backpropagation
+        # 节点立即奖励，用于树的回溯更新
         self.reward = reward
 
         # 导出该节点的动作，即对应课程
@@ -65,9 +66,11 @@ class Node:
         if not self.mdp.is_terminal(self.person_state):
             # Randomly select an unexpanded action to expand
             # 其实就是选一个从来没执行过的动作来expand，即每次只展开一个子节点
-            actions = self.mdp.get_actions(self.person_state) - self.children.keys()
+            actions = set(self.mdp.get_actions(self.person_state)) - set(self.children.keys())
+            if len(actions) == 0:
+                return self
+            
             action = random.choice(list(actions))
-
             self.children[action] = []
             return self.get_outcome_child(action)
         
@@ -77,59 +80,58 @@ class Node:
     def back_propagate(self, reward, child):
         action = child.action   # 触发这个child节点的action
 
-        Node.visits[self.state] = Node.visits[self.state] + 1
-        Node.visits[(self.state, action)] = Node.visits[(self.state, action)] + 1
+        Node.visits[self.person_state.str_repr()] = Node.visits[self.person_state.str_repr()] + 1
+        Node.visits[(self.person_state.str_repr(), action)] = Node.visits[(self.person_state.str_repr(), action)] + 1
 
         q_value = self.qfunction.get_q_value(self.state, action)
-        delta = (1 / (Node.visits[(self.state, action)])) * (
-            reward - self.qfunction.get_q_value(self.state, action)
-        )
+        delta = (1 / (Node.visits[(self.person_state.str_repr(), action)])) * (reward - q_value)
         self.qfunction.update(self.state, action, delta)
 
         if self.parent != None:
             self.parent.back_propagate(self.reward + reward, self)
 
 
-    """ Return the value of this node """
+    """ 返回节点的最大价值 """
 
     def get_value(self):
-        (_, max_q_value) = self.qfunction.get_max_q(
-            self.state, self.mdp.get_actions(self.state)
-        )
+        actions = self.mdp.get_actions(self.person_state)
+        max_q_value = float("-inf")
+        for action in actions:
+            key_state, key_action = fetch_key_state_action(action)
+            check_value = self.qfunction.get_max_q(key_state, [key_action])
+            if check_value > max_q_value:
+                max_q_value = check_value
         return max_q_value
 
 
-    """ Get the number of visits to this state """
+    """ 访问状态的次数 """
 
     def get_visits(self):
-        return Node.visits[self.state]
+        return Node.visits[self.person_state.str_repr()]
     
 
-    """ Simulate the outcome of an action, and return the child node """
+    """ 模拟动作执行，并返回相应的子节点 """
 
     def get_outcome_child(self, action):
-        # Choose one outcome based on transition probabilities
-        (next_state, reward) = self.mdp.execute(self.state, action)
+        (next_state, reward) = self.mdp.execute(self.person_state, action)
 
-        # Find the corresponding state and return if this already exists
         for (child, _) in self.children[action]:
-            if next_state == child.state:
+            if next_state == child.person_state:
                 return child
-
-        # This outcome has not occured from this state-action pair previously
+        
         new_child = Node(
             self.mdp, self, next_state, self.qfunction, self.q_algorithm, reward, action
         )
 
-        # Find the probability of this outcome (only possible for model-based) for visualising tree
-        probability = 0.0
-        for (outcome, probability) in self.mdp.get_transitions(self.state, action):
+        probability = 0.0  # hoho_todo：转移概率暂不用
+        for (outcome, probability) in self.mdp.get_transitions(self.person_state, action):
             if outcome == next_state:
                 self.children[action] += [(new_child, probability)]
                 return new_child
 
 
 class MCTS:
+
     def __init__(self, mdp, qfunction, q_algorithm):
         self.mdp = mdp
         self.qfunction = qfunction
@@ -197,13 +199,18 @@ class MCTS:
 
         return cumulative_reward
 
-if __name__ == "__main__":
-    state1 = PersonState()
-    state2 = PersonState()
 
-    my_dict = {}
-    my_dict[state1] = 1
-    my_dict[state2] = 2
-    print(my_dict[state1])
-    my_dict[state1] = my_dict[state1] + 2
-    print(my_dict[state1])
+if __name__ == "__main__":
+    # state1 = PersonState()
+    # state2 = PersonState()
+
+    # my_dict = {}
+    # my_dict[state1] = 1
+    # my_dict[state2] = 2
+    # print(my_dict[state1])
+    # my_dict[state1] = my_dict[state1] + 2
+    # print(my_dict[state1])
+
+    l1 = ["1", "2", "3"]
+    l2 = ["1"]
+    print(set(l1) - set(l2))
