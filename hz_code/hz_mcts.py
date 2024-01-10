@@ -31,7 +31,7 @@ class Node:
         # The immediate reward received for reaching this state, used for backpropagation
         self.reward = reward
 
-        # 导出该节点的动作，即对应课程名称
+        # 导出该节点的动作，即对应课程
         self.action = action
 
         # 子节点

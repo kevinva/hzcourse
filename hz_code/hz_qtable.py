@@ -34,7 +34,7 @@ class QTable():
         result_qtable = {}
         for ability, ability_dict in data_dict.items():
             for tag, tag_dict in ability_dict.items():
-                state = f"{ability}-{tag}"
+                state = f"{ability}-{tag}"   # state格式： "能力维度-标签"
                 for course, course_val in tag_dict.items():
                     action = course
                     result_qtable[(state, action)] = course_val
