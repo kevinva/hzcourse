@@ -4,9 +4,13 @@ import random
 from collections import defaultdict
 
 from hz_utils import LOGGER
+from hz_constants import *
+from hz_modules import *
 from hz_mdp import *
 from hz_ucb import *
 from hz_qtable import *
+
+
 
 class Node:
 
@@ -16,7 +20,7 @@ class Node:
     # 记录节点对应状态被访问次数
     visits = defaultdict(lambda: 0)
 
-    def __init__(self, mdp, parent, person_state, qfunction, q_algorithm, reward = 0.0, action = None):
+    def __init__(self, mdp: HZCourseWorld, parent, person_state: PersonState, qfunction: QTable, q_algorithm: UpperConfidenceBounds, reward = 0.0, action = None):
         self.mdp = mdp
         self.parent = parent
 
@@ -58,14 +62,13 @@ class Node:
             actions = list(self.children.keys())
             action = self.q_algorithm.select(self.person_state, actions, self.qfunction)
             
-            LOGGER.info(f"select child: action = {action}， from state = {str(self.person_state)}")
+            LOGGER.info(f"select child: action = {action}, from state = {str(self.person_state)}")
             return self.get_outcome_child(action).select()
 
 
     def expand(self):
         if not self.mdp.is_terminal(self.person_state):
-            # Randomly select an unexpanded action to expand
-            # 其实就是选一个从来没执行过的动作来expand，即每次只展开一个子节点
+            # 选一个从来没执行过的动作来expand，即每次只展开一个子节点
             actions = set(self.mdp.get_actions(self.person_state)) - set(self.children.keys())
             if len(actions) == 0:
                 return self
@@ -79,13 +82,14 @@ class Node:
 
     def back_propagate(self, reward, child):
         action = child.action   # 触发这个child节点的action
+        key_state = self.person_state.str_repr()
 
-        Node.visits[self.person_state.str_repr()] = Node.visits[self.person_state.str_repr()] + 1
-        Node.visits[(self.person_state.str_repr(), action)] = Node.visits[(self.person_state.str_repr(), action)] + 1
+        Node.visits[key_state] = Node.visits[key_state] + 1
+        Node.visits[(key_state, action)] = Node.visits[(key_state, action)] + 1
 
-        q_value = self.qfunction.get_q_value(self.state, action)
-        delta = (1 / (Node.visits[(self.person_state.str_repr(), action)])) * (reward - q_value)
-        self.qfunction.update(self.state, action, delta)
+        q_value = self.qfunction.get_q_value(key_state, action)
+        delta = (1.0 / Node.visits[(key_state, action)]) * (reward - q_value)
+        self.qfunction.update(key_state, action, delta)
 
         if self.parent != None:
             self.parent.back_propagate(self.reward + reward, self)
@@ -95,12 +99,7 @@ class Node:
 
     def get_value(self):
         actions = self.mdp.get_actions(self.person_state)
-        max_q_value = float("-inf")
-        for action in actions:
-            key_state, key_action = fetch_key_state_action(action)
-            check_value = self.qfunction.get_max_q(key_state, [key_action])
-            if check_value > max_q_value:
-                max_q_value = check_value
+        max_q_value = self.qfunction.get_max_q(self.person_state.str_repr(), actions)
         return max_q_value
 
 
@@ -132,13 +131,13 @@ class Node:
 
 class MCTS:
 
-    def __init__(self, mdp, qfunction, q_algorithm):
+    def __init__(self, mdp: HZCourseWorld, qfunction: QTable, q_algorithm: UpperConfidenceBounds):
         self.mdp = mdp
         self.qfunction = qfunction
         self.q_algorithm = q_algorithm
 
 
-    def mcts(self, timeout=1, root_node=None):
+    def mcts(self, timeout = 1, root_node = None):
         if root_node is None:
             root_node = self.create_root_node()
 
@@ -156,46 +155,37 @@ class MCTS:
         return root_node
 
 
-    """ Create a root node representing an initial state """
-
     def create_root_node(self):
         return Node(
             self.mdp, None, self.mdp.get_initial_state(), self.qfunction, self.q_algorithm
         )
 
 
-    """ Choose a random action. Heustics can be used here to improve simulations. """
 
+    """ 随机选择一个动作 """
 
-    def choose(self, state):
+    def choose(self, state: PersonState):
         return random.choice(self.mdp.get_actions(state))
 
 
-    """ Simulate until a terminal state """
+    """ 模拟游走直到终止状态 """
 
-    def simulate(self, node):
+    def simulate(self, node: Node):
         # simulate的意义只在于获得cumulative_reward?! 
         ### 注意： simulate过程中不需要expand
-        print(f"simulate: start at = {node.state}")
               
-        state = node.state
+        state = node.person_state
         cumulative_reward = 0.0
         depth = 0
         while not self.mdp.is_terminal(state):
-            # Choose an action to execute
             action = self.choose(state)
-
-            # Execute the action
             (next_state, reward) = self.mdp.execute(state, action)
-
-            # Discount the reward
-            cumulative_reward += pow(self.mdp.get_discount_factor(), depth) * reward
+            cumulative_reward += pow(DISCOUNT_FACTOR, depth) * reward
             depth += 1
 
             state = next_state
 
-        print(f"simulate end: depth = {depth}, cumulative_reward = {cumulative_reward}")
-        print("===========================================\n\n")
+        LOGGER.info(f"simulate end: depth = {depth}, cumulative_reward = {cumulative_reward}")
 
         return cumulative_reward
 

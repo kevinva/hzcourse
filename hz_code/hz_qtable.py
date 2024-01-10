@@ -1,18 +1,12 @@
-import json
 from collections import defaultdict
 
 
 
-class QTable():
+class QTable:
     
-    def __init__(self, default = 0.0, character = "基层河长"):
-        self.qtable = defaultdict(lambda: default)
+    def __init__(self):
+        self.qtable = defaultdict(lambda: 0.0)
 
-        file_path = "../data/courses_values_20240108100829.json"
-        with open(file_path, "r", encoding = "utf-8") as f:
-            data_dict = json.load(f)
-        
-        self.data_preprocess(data_dict[character])
 
     def update(self, state, action, delta):
         self.qtable[(state, action)] = self.qtable[(state, action)] + delta
@@ -29,17 +23,6 @@ class QTable():
                 arg_max_q = action
                 max_q = value
         return (arg_max_q, max_q)
-
-    def data_preprocess(self, data_dict):
-        result_qtable = {}
-        for ability, ability_dict in data_dict.items():
-            for tag, tag_dict in ability_dict.items():
-                state = f"{ability}-{tag}"   # state格式： "能力维度-标签"
-                for course, course_val in tag_dict.items():
-                    action = course
-                    result_qtable[(state, action)] = course_val
-        
-        self.qtable = result_qtable
 
 
 

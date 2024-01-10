@@ -1,1 +1,3 @@
 C_PUTS = 0.2
+
+DISCOUNT_FACTOR = 0.98
