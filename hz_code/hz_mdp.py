@@ -147,7 +147,7 @@ class HZCourseWorld:
 
     def get_transitions(self, state: PersonState, action):
         next_state, _ = self.execute(state, action)
-        return [next_state, 1.0] # hoho_todo
+        return [(next_state, 1.0)] # hoho_todo: 转移概率暂写死
 
     def get_initial_state(self):
         return self.init_person_state
