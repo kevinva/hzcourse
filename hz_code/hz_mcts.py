@@ -3,12 +3,12 @@ import time
 import random
 from collections import defaultdict
 
-from hz_utils import LOGGER
-from hz_constants import *
-from hz_modules import *
-from hz_mdp import *
-from hz_ucb import *
-from hz_qtable import *
+from hz_code.hz_utils import LOGGER
+from hz_code.hz_constants import *
+from hz_code.hz_modules import *
+from hz_code.hz_mdp import *
+from hz_code.hz_ucb import *
+from hz_code.hz_qtable import *
 
 
 
@@ -172,7 +172,7 @@ class MCTS:
 
     def simulate(self, node: Node):
         # simulate的意义只在于获得cumulative_reward?! 
-        ### 注意： simulate过程中不需要expand
+        ### 注意：simulate过程中不需要expand
               
         state = node.person_state
         cumulative_reward = 0.0

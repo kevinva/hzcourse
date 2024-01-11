@@ -1,10 +1,10 @@
 import math
 import random
 from collections import defaultdict
-from hz_constants import *
-from hz_utils import *
-from hz_modules import PersonState
-from hz_ucb import QTable
+from hz_code.hz_constants import *
+from hz_code.hz_utils import *
+from hz_code.hz_modules import PersonState
+from hz_code.hz_qtable import QTable
 
 
 

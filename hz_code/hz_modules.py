@@ -9,7 +9,7 @@ class PersonState:
                  manage_tags = [], 
                  manage_score = 100.0, 
                  knowledge_tags = [], 
-                 knowldege_score = 100.0,
+                 knowledge_score = 100.0,
                  habit_tags = [],
                  habit_score = 100.0,
                  skill_tags = [],
@@ -18,7 +18,7 @@ class PersonState:
         
         self.will_score = will_score
         self.manage_score = manage_score
-        self.knowledge_score = knowldege_score
+        self.knowledge_score = knowledge_score
         self.habit_score = habit_score
         self.skill_score = skill_score
         self.will_tags = will_tags

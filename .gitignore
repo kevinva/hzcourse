@@ -2,3 +2,4 @@
 data/courses_values.json
 data/
 *.pyc
+*.ipynb

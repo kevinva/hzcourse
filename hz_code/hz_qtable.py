@@ -1,7 +1,6 @@
 from collections import defaultdict
 
 
-
 class QTable:
     
     def __init__(self):

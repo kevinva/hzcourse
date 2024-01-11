@@ -1,16 +1,15 @@
 import json
 import copy
-from hz_constants import *
-from hz_modules import PersonState
+from hz_code.hz_constants import *
+from hz_code.hz_modules import PersonState
 
 
 
 class HZCourseWorld:
 
-    def __init__(self, person_state: PersonState = None):
+    def __init__(self, person_state: PersonState = None, file_path = None):
         self.course_info = {}
 
-        file_path = "../data/courses_values_20240108100829.json"
         with open(file_path, "r", encoding = "utf-8") as f:
             data_dict = json.load(f)
 
@@ -26,29 +25,34 @@ class HZCourseWorld:
         result_list = []
 
         for tag in state.manage_tags:
-            course_dict = self.course_info["管理"][tag]
+            course_dict = self.course_info["管理"].get(tag, {})
             course_list = [f"管理||{tag}||{course}" for course in course_dict.keys()]
-            result_list.extend(course_list)
+            if len(course_list) > 0:
+                result_list.extend(course_list)
 
         for tag in state.knowledge_tags:
-            course_dict = self.course_info["知识"][tag]
+            course_dict = self.course_info["知识"].get(tag, {})
             course_list = [f"知识||{tag}||{course}" for course in course_dict.keys()]
-            result_list.extend(course_list)
+            if len(course_list) > 0:
+                result_list.extend(course_list)
 
         for tag in state.skill_tags:
-            course_dict = self.course_info["技能"][tag]
+            course_dict = self.course_info["技能"].get(tag, {})
             course_list = [f"技能||{tag}||{course}" for course in course_dict.keys()]
-            result_list.extend(course_list)
+            if len(course_list) > 0:
+                result_list.extend(course_list)
 
         for tag in state.will_tags:
-            course_dict = self.course_info["意愿"][tag]
+            course_dict = self.course_info["意愿"].get(tag, {})
             course_list = [f"意愿||{tag}||{course}" for course in course_dict.keys()]
-            result_list.extend(course_list)
+            if len(course_list) > 0:
+                result_list.extend(course_list)
 
         for tag in state.habit_tags:
-            course_dict = self.course_info["习惯"][tag]
+            course_dict = self.course_info["习惯"].get(tag, {})
             course_list = [f"习惯||{tag}||{course}" for course in course_dict.keys()]
-            result_list.extend(course_list)
+            if len(course_list) > 0:
+                result_list.extend(course_list)
 
         # action格式："能力维度||标签||课程名字"
 
@@ -142,7 +146,8 @@ class HZCourseWorld:
 
 
     def get_transitions(self, state: PersonState, action):
-        return 1.0 # hoho_todo
+        next_state, _ = self.execute(state, action)
+        return [next_state, 1.0] # hoho_todo
 
     def get_initial_state(self):
         return self.init_person_state
