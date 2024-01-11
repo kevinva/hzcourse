@@ -1,3 +1,4 @@
+import json
 from collections import defaultdict
 
 
@@ -23,6 +24,14 @@ class QTable:
                 max_q = value
         return (arg_max_q, max_q)
 
+    def export(self, output_file_path):
+        result_dict = {}
+        for key, val in self.qtable.items():
+            k = f"{key[0]} ---> {key[1]}"
+            result_dict[k] = val
+   
+        with open(output_file_path, "w", encoding = "utf-8") as f:
+            json.dump(result_dict, f, indent = 4, ensure_ascii = False)
 
 
 if __name__ == "__main__":
