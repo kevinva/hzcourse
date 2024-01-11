@@ -1,4 +1,4 @@
 data/
 outputs/
 *.pyc
-*.ipynb
+.ipynb_checkpoints/
