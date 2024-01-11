@@ -1,5 +1,4 @@
-.ipynb_checkpoints/eda-checkpoint.ipynb
-data/courses_values.json
 data/
+outputs/
 *.pyc
 *.ipynb
