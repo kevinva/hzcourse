@@ -190,13 +190,55 @@ class MCTS:
         return cumulative_reward
     
 
-def visual_mcts_tree(root: Node):
-    result_dict = {}
-    result_dict["root"] = {}
-    data, children = visual_mcts_tree(root)
-    result_dict["root"] = {"data": data, "children": children}
+def mcts_tree_to_dict(node: Node):
+    if len(node.children) == 0:
+        child_dict = {}
+        child_dict["data"] = {"text": node.action}
+        child_dict["children"] = []
+
+        state_dict = {}
+        state_dict["data"] = {"text": node.person_state.__repr__()}
+        state_dict["children"] = []
+
+        child_dict["children"] = [state_dict]
+
+        return child_dict
+    else:
+        result_dict = {}
+
+        if node.parent is None:
+            node_dict = {}
+            node_dict["data"] = {"text": node.person_state.__repr__()}
+            children = []
+            for action, transition_list in node.children.items():
+                for (child_node, _) in transition_list:
+                    child_dict = mcts_tree_to_dict(child_node)
+                    children.append(child_dict)
+            node_dict["children"] = children
+            result_dict["root"] = node_dict
+        else:
+            node_dict = {}
+            node_dict["data"] = {"text": node.action}
+     
+            state_dict = {}
+            state_dict["data"] = {"text": node.person_state.__repr__()}
+            children = []
+            for action, transition_list in node.children.items():
+                for (child_node, _) in transition_list:
+                    child_dict = mcts_tree_to_dict(child_node)
+                    children.append(child_dict)
+            state_dict["children"] = children
+
+            node_dict["children"] = [state_dict]
+
+            result_dict = node_dict
 
     return result_dict
+
+
+def visual_tree(tree_dict, output_file_path = None):
+    with open(output_file_path, "w", encoding = "utf-8") as f:
+        json.dump(tree_dict, f, indent = 4, ensure_ascii = False)
 
 
 if __name__ == "__main__":
@@ -210,6 +252,11 @@ if __name__ == "__main__":
     # my_dict[state1] = my_dict[state1] + 2
     # print(my_dict[state1])
 
-    l1 = ["1", "2", "3"]
-    l2 = ["1"]
-    print(set(l1) - set(l2))
+    # l1 = ["1", "2", "3"]
+    # l2 = ["1"]
+    # print(set(l1) - set(l2))
+
+    d1 = {"管理": ["1", "2"]}
+    d2 = {"知识": []}
+    print(json.dumps(d1, ensure_ascii = False))
+    print(json.dumps(d2, ensure_ascii = False))

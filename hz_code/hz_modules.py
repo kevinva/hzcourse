@@ -37,7 +37,7 @@ class PersonState:
                 and len(self.habit_tags) == 0
     
 
-    def str_repr(self):
+    def str_repr(self) -> str:
         manage_list = sorted(self.manage_tags)
         manage_list = [f"管理||{tag}" for tag in manage_list]
         knowledge_list = sorted(self.knowledge_tags)
@@ -58,8 +58,18 @@ class PersonState:
         result = json.dumps(all_list, ensure_ascii = False)
         return result
 
+    def __repr__(self) -> str:
+        manage_dict = {"管理:": self.manage_tags}
+        skill_dict = {"技能": self.skill_tags}
+        knowledge_dict = {"知识": self.knowledge_tags}
+        will_dict = {"意愿": self.will_tags}
+        habit_dict = {"习惯": self.habit_tags}
+        score_text = f"(管理: {self.manage_score},  技能: {self.skill_score}, 知识: {self.knowledge_score}, 意愿: {self.will_score}, 习惯: {self.habit_score})"
+        result = f"{json.dumps(manage_dict, ensure_ascii = False)}\n{json.dumps(skill_dict, ensure_ascii = False)}\n{json.dumps(knowledge_dict, ensure_ascii = False)}\n{json.dumps(will_dict, ensure_ascii = False)}\n{json.dumps(habit_dict, ensure_ascii = False)}\n{score_text}"
+        return result
 
-    def __str__(self):
+
+    def __str__(self) -> str:
         return f"manage = {self.manage_score}, knowledge = {self.knowledge_score}, skill = {self.skill_score}, habit = {self.habit_score}, will = {self.will_score}"
 
 

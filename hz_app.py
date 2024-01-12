@@ -40,10 +40,10 @@ def app():
     qfunction = QTable()
     algorithm = UpperConfidenceBounds()
     model = MCTS(mdp = course_world, qfunction = qfunction, q_algorithm = algorithm)
-    model.mcts()
+    root_node = model.mcts()
 
     suffix = suffix_time()
-    output_file_path = f"outputs/qtable_{suffix}.json"
+    output_file_path = f"./outputs/qtable_{suffix}.json"
     qfunction.export(output_file_path)
 
     # 打印候选结果
@@ -54,6 +54,11 @@ def app():
         action = key[1]
         if state == state_str:
             print(f"{action}: {score}")
+
+    tree_dict = mcts_tree_to_dict(root_node)
+    tree_output_file_path = f"./outputs/mcts_{suffix}.km"
+    visual_tree(tree_dict, tree_output_file_path)
+
 
 
 app()
