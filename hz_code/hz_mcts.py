@@ -188,6 +188,15 @@ class MCTS:
         LOGGER.info(f"simulate end: depth = {depth}, cumulative_reward = {cumulative_reward}")
 
         return cumulative_reward
+    
+
+def visual_mcts_tree(root: Node):
+    result_dict = {}
+    result_dict["root"] = {}
+    data, children = visual_mcts_tree(root)
+    result_dict["root"] = {"data": data, "children": children}
+
+    return result_dict
 
 
 if __name__ == "__main__":
