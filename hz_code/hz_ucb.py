@@ -43,7 +43,7 @@ class UpperConfidenceBounds:
         self.state_action_times[(key_state, result_action)] = self.state_action_times[(key_state, result_action)] + 1
         self.state_times[result_action] += 1
 
-        LOGGER.info(f"state = {self.state_times}, action_state = {self.state_action_times}")
+        # LOGGER.info(f"state = {self.state_times}, action_state = {self.state_action_times}")
 
         return result_action
     

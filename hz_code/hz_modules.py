@@ -59,7 +59,7 @@ class PersonState:
         return result
 
     def __repr__(self) -> str:
-        manage_dict = {"管理:": self.manage_tags}
+        manage_dict = {"管理": self.manage_tags}
         skill_dict = {"技能": self.skill_tags}
         knowledge_dict = {"知识": self.knowledge_tags}
         will_dict = {"意愿": self.will_tags}

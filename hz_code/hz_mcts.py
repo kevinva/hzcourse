@@ -62,7 +62,7 @@ class Node:
             actions = list(self.children.keys())
             action = self.q_algorithm.select(self.person_state, actions, self.qfunction)
             
-            LOGGER.info(f"select child: action = {action}, from state = {str(self.person_state)}")
+            # LOGGER.info(f"select child: action = {action}, from state = {str(self.person_state)}")
             return self.get_outcome_child(action).select()
 
 
@@ -185,15 +185,18 @@ class MCTS:
 
             state = next_state
 
-        LOGGER.info(f"simulate end: depth = {depth}, cumulative_reward = {cumulative_reward}")
+        # LOGGER.info(f"simulate end: depth = {depth}, cumulative_reward = {cumulative_reward}")
 
         return cumulative_reward
     
 
-def mcts_tree_to_dict(node: Node):
+def mcts_tree_to_dict(node: Node, qfunction: QTable):
     if len(node.children) == 0:
+        key_state = node.parent.person_state.str_repr()
+        score = qfunction.get_q_value(key_state, node.action)
+
         child_dict = {}
-        child_dict["data"] = {"text": node.action}
+        child_dict["data"] = {"text": f"{node.action}: {score}"}
         child_dict["children"] = []
 
         state_dict = {}
@@ -212,20 +215,23 @@ def mcts_tree_to_dict(node: Node):
             children = []
             for action, transition_list in node.children.items():
                 for (child_node, _) in transition_list:
-                    child_dict = mcts_tree_to_dict(child_node)
+                    child_dict = mcts_tree_to_dict(child_node, qfunction)
                     children.append(child_dict)
             node_dict["children"] = children
             result_dict["root"] = node_dict
         else:
+            key_state = node.parent.person_state.str_repr()
+            score = qfunction.get_q_value(key_state, node.action)
+
             node_dict = {}
-            node_dict["data"] = {"text": node.action}
+            node_dict["data"] = {"text": f"{node.action}: {score}"}
      
             state_dict = {}
             state_dict["data"] = {"text": node.person_state.__repr__()}
             children = []
             for action, transition_list in node.children.items():
                 for (child_node, _) in transition_list:
-                    child_dict = mcts_tree_to_dict(child_node)
+                    child_dict = mcts_tree_to_dict(child_node, qfunction)
                     children.append(child_dict)
             state_dict["children"] = children
 
